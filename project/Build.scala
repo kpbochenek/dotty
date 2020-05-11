@@ -98,7 +98,8 @@ object Build {
     else if (isNightly)
       baseVersion + "-bin-" + VersionUtil.commitDate + "-" + VersionUtil.gitHash + "-NIGHTLY"
     else
-      baseVersion + "-bin-SNAPSHOT"
+      //baseVersion + "-bin-SNAPSHOT"
+      "0.24.0-RC1"
   }
   val dottyNonBootstrappedVersion = dottyVersion + "-nonbootstrapped"
 
@@ -159,6 +160,7 @@ object Build {
       "-unchecked",
       "-Xfatal-warnings",
       "-encoding", "UTF8",
+      "-Ysemanticdb",
       "-language:existentials,higherKinds,implicitConversions,postfixOps"
     ),
 
@@ -279,7 +281,7 @@ object Build {
   lazy val commonBootstrappedSettings = commonDottySettings ++ Seq(
     unmanagedSourceDirectories in Compile += baseDirectory.value / "src-bootstrapped",
 
-    version := dottyVersion,
+    version := dottyVersion + "-kris",
     scalaVersion := dottyNonBootstrappedVersion,
 
     scalaCompilerBridgeBinaryJar := {

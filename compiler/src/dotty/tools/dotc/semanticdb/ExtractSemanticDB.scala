@@ -116,12 +116,14 @@ class ExtractSemanticDB extends Phase:
 
       inline def traverseCtorParamTpt(ctorSym: Symbol, tpt: Tree): Unit =
         val tptSym = tpt.symbol
-        if tptSym.owner == ctorSym
-          val found = matchingMemberType(tptSym, ctorSym.owner)
-          if tpt.span.hasLength
-            registerUseGuarded(None, found, tpt.span)
-        else
-          traverse(tpt)
+        try {
+          if tptSym.owner == ctorSym
+            val found = matchingMemberType(tptSym, ctorSym.owner)
+            if tpt.span.hasLength
+              registerUseGuarded(None, found, tpt.span)
+          else
+            traverse(tpt)
+        } catch { case e: Throwable => traverse(tpt) }
 
       traverseAnnotsOf(tree.symbol)
 
@@ -503,12 +505,13 @@ class ExtractSemanticDB extends Phase:
     end findGetters
 
     private def adjustSpanToName(span: Span, qualSpan: Span, name: Name)(using Context) =
-      val end = span.end
-      val limit = qualSpan.end
+      val slen = source.content().length
+      val end = math.min(span.end, slen)
+      val limit = math.min(qualSpan.end, slen)
       val start =
         if limit < end then
           val len = name.toString.length
-          if source.content()(end - 1) == '`' then end - len - 2 else end - len
+          if source.content().length >= end && source.content()(end - 1) == '`' then end - len - 2 else end - len
         else limit
       Span(start max limit, end)
 
